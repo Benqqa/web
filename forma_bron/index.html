@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Бронирование билетов</title>
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="style/style.css">
+    <link rel="stylesheet" href="style/null.css">
+    <link rel="stylesheet" type="text/css" href="style/default.css"/>
+    <link rel="stylesheet" type="text/css" href="style/component.css"/>
+    <link rel="stylesheet" type="text/css" href="style/set2.css"/>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/swiper@5.3.6/css/swiper.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/swiper@5.3.6/js/swiper.min.js"></script>
+    <link href="https://unpkg.com/vue-cal/dist/vuecal.css" rel="stylesheet">
+    <script src="https://unpkg.com/vue-cal"></script>
+
+    <link rel="shortcut icon" href="icon/film-01.svg" type="image/x-icon">
+</head>
+<body>
+<div class="wrapper" id="wrapper">
+    <div v-show="popupShowed" :class="{backpopup: popupShowed}" @click="closePopup()"
+         style="position: fixed; width: 100%; height: 100%"></div>
+    <div class="content">
+        <div class="slider__bg">
+            <div id="app">
+                <div class="sections-menu">
+	      <span
+                  class="menu-point"
+                  :class="{active: activeSection == index}"
+                  @click="scrollToSection(index)"
+                  v-for="(offset, index) in offsets"
+                  :key="index">
+
+	      </span>
+                </div>
+                <section class="fullpage slide1">
+
+                    <div class="slider__bg__conent">
+                        <div class="slider">
+                            <div class="slider__scrol">
+                                <div class="slider__list">
+                                    <div class="item slider__item1" @click="scrollToSection(0)"
+                                    >
+                                        <div class="item__content">
+                                            <div class="item__title"></div>
+                                            <div class="item__body"></div>
+                                            <div class="item__futter"></div>
+                                        </div>
+                                    </div>
+                                    <div class="item slider__item2" @click="scrollToSection(1)"
+                                    >
+                                        <div class="item__content">
+                                            <div class="item__title"></div>
+                                            <div class="item__body"></div>
+                                            <div class="item__futter"></div>
+                                        </div>
+                                    </div>
+                                    <div class="item slider__item3" @click="scrollToSection(2)"
+                                    >
+                                        <div class="item__content">
+                                            <div class="item__title"></div>
+                                            <div class="item__body"></div>
+                                            <div class="item__futter"></div>
+                                        </div>
+                                    </div>
+                                    <div class="item slider__item4" @click="scrollToSection(3)"
+                                    >
+                                        <div class="item__content">
+                                            <div class="item__title"></div>
+                                            <div class="item__body"></div>
+                                            <div class="item__futter"></div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="slider__slide1 slide">
+                                <div class="slide__content">
+                                    <div class="slide__title">Выберите фильм</div>
+                                    <div v-if="(activeSection == 0)"
+                                         @click="showFilter(e)" class="slide__filter">
+                                        Фильтр(тач ми):
+                                    </div>
+
+                                    <transition name="slide-fade">
+                                        <div class="box_filterPanel" v-if="((isFilterActive) && (activeSection === 0))">
+                                            <div class="filterPanel" style="height: 8em">
+                                                <swiper ref="swiperComponent"
+                                                        :options="swiperOptions"
+                                                        @click-slide="onSwiperClickSlide">
+                                                    <swiper-slide
+                                                            :class="{selectedGenre: selectedIndexes[0]}">
+                                                        Семейные
+                                                    </swiper-slide>
+                                                    <swiper-slide
+                                                            :class="{selectedGenre: selectedIndexes[1]}">
+                                                        Триллеры
+                                                    </swiper-slide>
+                                                    <swiper-slide
+                                                            :class="{selectedGenre: selectedIndexes[2]}">
+                                                        Комедии
+                                                    </swiper-slide>
+                                                    <swiper-slide
+                                                            :class="{selectedGenre: selectedIndexes[3]}">
+                                                        Фантастика
+                                                    </swiper-slide>
+                                                    <swiper-slide
+                                                            :class="{selectedGenre: selectedIndexes[4]}">
+                                                        Ужасы
+                                                    </swiper-slide>
+                                                    <swiper-slide
+                                                            :class="{selectedGenre: selectedIndexes[5]}">
+                                                        Драмы
+                                                    </swiper-slide>
+                                                    <swiper-slide
+                                                            :class="{selectedGenre: selectedIndexes[6]}">
+                                                        Мелодрамы
+                                                    </swiper-slide>
+                                                    <swiper-slide
+                                                            :class="{selectedGenre: selectedIndexes[7]}">
+                                                        Детективы
+                                                    </swiper-slide>
+                                                    <div class="swiper-pagination" slot="pagination"></div>
+                                                </swiper>
+                                                <div>
+                                                    <input v-model="onlyWith" type="checkbox" id="onlyWith"
+                                                           name="onlyWith">
+                                                    <label for="onlyWith" style="color: black" class="filter__check">Только
+                                                        с билетами</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </transition>
+                                    <div class="slide__body panel">
+                                        <div class="panel__conent">
+                                            <ul class="grid cs-style-4">
+                                                <div v-swiper:swiper="swiperOptionsForFilms">
+                                                    <div class="swiper-wrapper">
+                                                        <li v-for="(film, index) in currentFilmList" :key="index"
+                                                            class="swiper-slide" style="background-color: white">
+                                                            <figure v-if="(selectedIndexes[film.genre]) || (!isFilterActive)"
+                                                                    :class="{filmSelected: isFilmSelected[film.id]}">
+                                                                <div class="figure__img"><img
+                                                                        :src="film.logo" alt="img05">
+                                                                </div>
+                                                                <figcaption>
+                                                                    <h3>{{film.title}}</h3>
+                                                                    <span>{{film.subtitle}}</span>
+                                                                    <a href="#" v-if="!isFilmSelected[film.id]"
+                                                                       @click="selectFilm(film),scrollToSection(1)">Выбрать
+                                                                    </a>
+                                                                    <a href="#" v-if="isFilmSelected[film.id]"
+                                                                       @click="selectFilm(film)">Отмена
+                                                                    </a>
+                                                                </figcaption>
+                                                            </figure>
+                                                        </li>
+                                                    </div>
+                                                    <div class="swiper-button-prev" slot="button-prev"></div>
+                                                    <div class="swiper-button-next" slot="button-next"></div>
+                                                </div>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="slide__futter">
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </section>
+                <section class="fullpage slide2">
+
+                    <div class="slider__bg__conent">
+                        <div class="slider">
+                            <div class="slider__scrol">
+                                <div class="slider__list">
+                                    <div class="item slider__item1" @click="scrollToSection(0)"
+                                    >
+                                        <div class="item__content">
+                                            <div class="item__title"></div>
+                                            <div class="item__body"></div>
+                                            <div class="item__futter"></div>
+                                        </div>
+                                    </div>
+                                    <div class="item slider__item2" @click="scrollToSection(1)"
+                                    >
+                                        <div class="item__content">
+                                            <div class="item__title"></div>
+                                            <div class="item__body"></div>
+                                            <div class="item__futter"></div>
+                                        </div>
+                                    </div>
+                                    <div class="item slider__item3" @click="scrollToSection(2)"
+                                    >
+                                        <div class="item__content">
+                                            <div class="item__title"></div>
+                                            <div class="item__body"></div>
+                                            <div class="item__futter"></div>
+                                        </div>
+                                    </div>
+                                    <div class="item slider__item4" @click="scrollToSection(3)"
+                                    >
+                                        <div class="item__content">
+                                            <div class="item__title"></div>
+                                            <div class="item__body"></div>
+                                            <div class="item__futter"></div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="slider__slide1 slide">
+                                <div class="slide__content">
+                                    <div class="slide__title">
+                                        Выберите время
+                                    </div>
+                                    <div class="slide__body panel">
+                                        <div class="panel__content">
+                                            <div class="panel__date">
+                                                <div class="panel__date__date">
+                                                    <p>Дата сеанса</p>
+                                                    <button
+                                                            v-for="(seance, index) in this.seances"
+                                                            :class="{activeDate: isDateActive[index]}"
+                                                            style="margin-right: 20px"
+                                                            @click="selectDate(index)">
+                                                        {{seance.date}}
+                                                    </button>
+                                                </div>
+                                                <div class="panel__date__time">
+                                                    <p>Время сеанса</p>
+                                                    <button v-for="(seance, index) in this.seances[this.selectedDateID].seances"
+                                                            :class="{activeDate: isTimeActive[index]}"
+                                                            @click="selectTime(index)"
+                                                            style="margin-right: 20px">{{seance}}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="panel__calendar">
+                                                <vue-cal
+                                                        :events="events"
+                                                        hide-view-selector
+                                                        :disable-views="['years', 'year', 'week']"
+                                                        @cell-focus="handleCalendar($event)"
+                                                        active-view="month"
+                                                        xsmall
+
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="slide__futter">
+                                        <div class="panel3__item panel3-item4">
+                                            <div class="panel3-item4__content">
+                                                <a class="panel__btn" @click="scrollToSection(2)">Далее</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </section>
+                <section class="fullpage slide3">
+
+                    <div class="slider__bg__conent">
+                        <div class="slider">
+                            <div class="slider__scrol">
+                                <div class="slider__list">
+                                    <div class="item slider__item1" @click="scrollToSection(0)"
+                                    >
+                                        <div class="item__content">
+                                            <div class="item__title"></div>
+                                            <div class="item__body"></div>
+                                            <div class="item__futter"></div>
+                                        </div>
+                                    </div>
+                                    <div class="item slider__item2" @click="scrollToSection(1)"
+                                    >
+                                        <div class="item__content">
+                                            <div class="item__title"></div>
+                                            <div class="item__body"></div>
+                                            <div class="item__futter"></div>
+                                        </div>
+                                    </div>
+                                    <div class="item slider__item3" @click="scrollToSection(2)"
+                                    >
+                                        <div class="item__content">
+                                            <div class="item__title"></div>
+                                            <div class="item__body"></div>
+                                            <div class="item__futter"></div>
+                                        </div>
+                                    </div>
+                                    <div class="item slider__item4" @click="scrollToSection(3)"
+                                    >
+                                        <div class="item__content">
+                                            <div class="item__title"></div>
+                                            <div class="item__body"></div>
+                                            <div class="item__futter"></div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="slider__slide1 slide slide3">
+                                <div class="slide__content">
+                                    <div class="slide__title">Выберите билеты</div>
+                                    <div class="slide3__body panel3">
+                                        <div class="panel3__conent">
+                                            <div class="panel3__item panel3-item1">
+                                                <div class="panel3-item1__content">
+                                                    <div class="panel3-item1__film">Фильм:</div>
+                                                    <div>{{selectedFilm.title}}</div>
+                                                    <div class="panel3-item1__date panel3-item1-date">
+                                                        <div class="panel3-item1-date__content">
+                                                            <div class="panel3-item1-date__date">Дата:
+                                                                {{seances[selectedDateID].date}}
+                                                            </div>
+                                                            <div class="panel3-item1-date__time">Время:
+                                                                {{seances[selectedDateID].seances[selectedTimeID]}}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="panel3__item panel3-item2">
+                                                <div class="panel3-item2__content">
+                                                    <div class="panel3-info panel3-item2__info1">Свободно</div>
+                                                    <div class="panel3-info panel3-item2__info2">Выбранно вами</div>
+                                                    <div class="panel3-info panel3-item2__info3">Занято</div>
+                                                </div>
+                                            </div>
+                                            <div class="panel3__item panel3-item3">
+                                                <div class="panel3-item3__content">
+                                                    <div class="panel3-place"
+                                                         :class="{activeDate: item}"
+                                                         v-for="(item, index) in isPlaceSelected"
+                                                         @click="place_select(index+1)">
+                                                        <input type="button">
+                                                        {{index+1}}
+                                                        </input>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="panel3__item panel3-item4">
+                                                <div class="panel3-item4__content">
+                                                    <a class="panel__btn" @click="scrollToSection(3)">Далее</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="slide3__futter"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </section>
+                <section class="fullpage slide4">
+
+                    <div class="slider__bg__conent">
+                        <div class="slider">
+                            <div class="slider__scrol">
+                                <div class="slider__list">
+                                    <div class="item slider__item1" @click="scrollToSection(0)"
+                                    >
+                                        <div class="item__content">
+                                            <div class="item__title"></div>
+                                            <div class="item__body"></div>
+                                            <div class="item__futter"></div>
+                                        </div>
+                                    </div>
+                                    <div class="item slider__item2" @click="scrollToSection(1)"
+                                    >
+                                        <div class="item__content">
+                                            <div class="item__title"></div>
+                                            <div class="item__body"></div>
+                                            <div class="item__futter"></div>
+                                        </div>
+                                    </div>
+                                    <div class="item slider__item3" @click="scrollToSection(2)"
+                                    >
+                                        <div class="item__content">
+                                            <div class="item__title"></div>
+                                            <div class="item__body"></div>
+                                            <div class="item__futter"></div>
+                                        </div>
+                                    </div>
+                                    <div class="item slider__item4" @click="scrollToSection(3)"
+                                    >
+                                        <div class="item__content">
+                                            <div class="item__title"></div>
+                                            <div class="item__body"></div>
+                                            <div class="item__futter"></div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="slider__slide1 slide">
+                                <div class="slide__content">
+                                    <div class="slide__title">Заполните контактные данные</div>
+
+                                    <div class="slide__body panel">
+                                        <div class="panel__conent">
+                                            <div class="panel__left panel-left">
+                                                <div class="panel-left__conent">
+                                                    <div class="panel-left-top">
+                                                        <div class="panel-left-top__content">
+                                                            <div class="panel-item panel__item1">
+                                                                <div class="panel-item__content">
+                                                                    <div class="panel__text">Имя:</div>
+                                                                    <div class="panel__input">
+                                                                        <span class="input input--nao">
+                                                                                <input class="input__field input__field--nao"
+                                                                                       type="text"
+                                                                                       v-model="ticketName"/>
+                                                                                <svg class="graphic graphic--nao"
+                                                                                     width="300%" height="100%"
+                                                                                     viewBox="0 0 1200 60"
+                                                                                     preserveAspectRatio="none">
+                                                                                    <path d="M0,56.5c0,0,298.666,0,399.333,0C448.336,56.5,513.994,46,597,46c77.327,0,135,10.5,200.999,10.5c95.996,0,402.001,0,402.001,0"/>
+                                                                                </svg>
+                                                                            </span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="panel-item panel__item2">
+                                                                <div class="panel-item__content">
+                                                                    <div class="panel__text">Фамилия:</div>
+                                                                    <div class="panel__input">
+                                                                          <span class="input input--nao">
+                                                                                <input class="input__field input__field--nao"
+                                                                                       type="text"
+                                                                                       v-model="ticketSurname"/>
+                                                                                <svg class="graphic graphic--nao"
+                                                                                     width="300%" height="100%"
+                                                                                     viewBox="0 0 1200 60"
+                                                                                     preserveAspectRatio="none">
+                                                                                    <path d="M0,56.5c0,0,298.666,0,399.333,0C448.336,56.5,513.994,46,597,46c77.327,0,135,10.5,200.999,10.5c95.996,0,402.001,0,402.001,0"/>
+                                                                                </svg>
+                                                                            </span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="panel-item panel__item3">
+                                                                <div class="panel-item__content">
+                                                                    <div class="panel__text">Номер телефона:</div>
+                                                                    <div class="panel__input">
+                                                                        
+                                                                        
+                                                                            <span class="input input--nao">
+                                                                                <input class="input__field input__field--nao"
+                                                                                       type="text"
+                                                                                       v-model="ticketPhone"/>
+                                                                                <svg class="graphic graphic--nao"
+                                                                                     width="300%" height="100%"
+                                                                                     viewBox="0 0 1200 60"
+                                                                                     preserveAspectRatio="none">
+                                                                                    <path d="M0,56.5c0,0,298.666,0,399.333,0C448.336,56.5,513.994,46,597,46c77.327,0,135,10.5,200.999,10.5c95.996,0,402.001,0,402.001,0"/>
+                                                                                </svg>
+                                                                            </span>
+
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="panel-item panel__item4">
+                                                                <div class="panel-item__content">
+                                                                    <div class="panel__text">Электронная почта:</div>
+                                                                    <div class="panel__input">
+                                                                        
+                                                                          <span class="input input--nao">
+                                                                                <input class="input__field input__field--nao"
+                                                                                       type="text"
+                                                                                       v-model="ticketEmail"/>
+                                                                                <svg class="graphic graphic--nao"
+                                                                                     width="300%" height="100%"
+                                                                                     viewBox="0 0 1200 60"
+                                                                                     preserveAspectRatio="none">
+                                                                                    <path d="M0,56.5c0,0,298.666,0,399.333,0C448.336,56.5,513.994,46,597,46c77.327,0,135,10.5,200.999,10.5c95.996,0,402.001,0,402.001,0"/>
+                                                                                </svg>
+                                                                            </span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="panel-item panel__item5">
+                                                                <div class="panel-item__content">
+                                                                    <div class="panel__text">Бонусная карта:</div>
+                                                                    <div class="panel__input">
+                                                                       
+                                                                          <span class="input input--nao">
+                                                                                <input class="input__field input__field--nao"
+                                                                                       type="text"/>
+                                                                                <svg class="graphic graphic--nao"
+                                                                                     width="300%" height="100%"
+                                                                                     viewBox="0 0 1200 60"
+                                                                                     preserveAspectRatio="none">
+                                                                                    <path d="M0,56.5c0,0,298.666,0,399.333,0C448.336,56.5,513.994,46,597,46c77.327,0,135,10.5,200.999,10.5c95.996,0,402.001,0,402.001,0"/>
+                                                                                </svg>
+                                                                            </span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="panel-item panel__item6">
+                                                                <div class="panel-item__content-btn">
+                                                                    <a href="#" class="panel-item__btn">Онлайн</a>
+                                                                    <a href="#" class="panel-item__btn">При входе</a>
+                                                                    <a href="#" class="panel-item__btn">Перевод</a>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="panel-left-bottom">
+                                                        <button @click="showPopup()" class="submit">Отправить</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="panel__right panel-right">
+                                                <div class="panel-right__content">
+                                                    <div class="panel-right__img">
+                                                        <img :src="selectedFilm.logo"/>
+                                                    </div>
+                                                    <div class="panel-right__text">
+                                                        <div class="panel-right-item__content">
+                                                            <div class="panel-right-item panel-right__item1">Фильм:
+                                                                <div>"{{selectedFilm.title}}"</div>
+                                                            </div>
+
+                                                            <div class="panel-right-item panel-right__item2">
+                                                                <div class="panel-right-item__date">Дата:</div>
+                                                                <div style="margin-right: 30%" v-if="!isNoDate">
+                                                                    {{seances[selectedDateID].date}}
+                                                                </div>
+                                                                <div class="panel-right-item__time">Время:</div>
+                                                                <div v-if="!isNoDate">
+                                                                    {{seances[selectedDateID].seances[selectedTimeID]}}
+                                                                </div>
+                                                            </div>
+                                                            <div class="panel-right-item panel-right__item3">Место:
+                                                                <div>{{selectedPlace}}</div>
+                                                            </div>
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="slide__futter"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </section>
+            </div>
+        </div>
+    </div>
+    <div class="popup" v-if="popupShowed" id="popup">
+        <div class="popup__main" style="">
+            <div v-if="noerror" style="width:  100%; height: 100%;">
+                <div class="popup__content1">
+                    <div class="popap__left">
+                        <div class="popap-left__content">
+                            <p>Фильм: "{{selectedFilm.title}}"</p>
+                            <p>Дата: {{seances[selectedDateID].date}}</p>
+                            <p>Время: {{seances[selectedDateID].seances[selectedTimeID]}}</p>
+                            <p>Имя: {{ticketName}}</p>
+                            <p>Фамилия: {{ticketSurname}}</p>
+                            <p>E-mail: {{ticketEmail}}</p>
+                            <p>Телефон: {{ticketPhone}}</p>
+                            <p>Место в зале:{{selectedPlace}}</p>
+                            <div class="popap-left__btns">
+                                <div class="popap-btns___content">
+                                    <button style="float: left" @click="cancelButton()">Отменить</button>
+                                    <button style="float: right" @click="okButton()">Подтвердить</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="popap__right"></div>
+                </div>
+            </div>
+            <div v-if="formErrors.length" style="width:  100%; height: 100%;">
+                <div class="popup__content2">
+
+                    <div class="popap__left">
+                        <p>Пожалуйста, исправьте указанные ошибки:</p>
+                        <ul>
+                            <li v-for="error in formErrors">{{ error }}</li>
+                        </ul>
+                    </div>
+                    <div class="popap__right"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/vue-awesome-swiper"></script>
+<script src="js/modernizr.custom.js"></script>
+<script>
+
+    Vue.use(VueAwesomeSwiper)
+    Vue.component('vue-cal', vuecal)
+    const app = new Vue({
+        el: '#wrapper',
+        data: {
+            ticketName: "",
+            ticketSurname: "",
+            ticketEmail: "",
+            ticketPhone: "",
+            inMove: false,
+            popupShowed: false,
+            activeSection: 0,
+            offsets: [],
+            currentDate: {},
+            isNoDate: false,
+            isFilterActive: false,
+            selectedFilm: {},
+            isFilmSelected: [false, false, false, false, false, false],
+            onlyWith: false,
+            events: [],
+            isDateActive: [true, false, false, false, false],
+            isTimeActive: [true, false, false, false, false],
+            selectedDateID: 0,
+            currentFilmList: [],
+            selectedPlace: "",
+            isPlaceSelected: [],
+            selectedTimeID: 0,
+            formErrors: [],
+            noerror: false,
+            films: [
+                {
+                    id: 0,
+                    title: "Шерлок ХОЛМС",
+                    subtitle: "Небольшое описание",
+                    genre: 7,
+                    logo: "img/films/tS8vmo4WTsM.jpg"
+                },
+                {
+                    id: 1,
+                    title: "Высотка",
+                    subtitle: "Небольшое описание",
+                    genre: 1,
+                    logo: "img/films/iOvhy2OGl2g.jpg"
+                },
+                {
+                    id: 2,
+                    title: "Строго на запад",
+                    subtitle: "Небольшое описание",
+                    genre: 1,
+                    logo: "img/films/-chdDyRtA5M.jpg"
+                },
+                {
+                    id: 3,
+                    title: "Великая стена",
+                    subtitle: "Небольшое описание",
+                    genre: 1,
+                    logo: "img/films/JqQ1kJaWp_0.jpg"
+                },
+                {
+                    id: 4,
+                    title: "Лучшее лето нашей жизни",
+                    subtitle: "Небольшое описание",
+                    genre: 2,
+                    logo: "img/films/--Jw3X0UP90.jpg"
+                },
+
+                {
+                    id: 5,
+                    title: "Аватар",
+                    subtitle: "Jacon Cummings",
+                    genre: 3,
+                    logo: "img/films/wAj-HTvLQGw.jpg"
+                }
+            ],
+            seances: [{date: "2020-07-20", seances: ["16:46"]}, {date: "2020-07-22", seances: ["10:00"]}],
+            selectedIndexes: [false, false, false, false, false, false, false, false],
+            swiperOptions: {
+                loop: true,
+                slidesPerView: 3
+            },
+            swiperOptionsForFilms: {
+                loop: false,
+                slidesPerView: 1,
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev'
+                }
+            },
+        },
+        methods: {
+            cancelButton() {
+                this.selectedFilm = {};
+                for (let i = 0; i < this.isFilmSelected.length; i++) {
+                    this.isFilmSelected[i] = false;
+                }
+                for (let i = 0; i < this.isDateActive.length; i++) {
+                    this.isDateActive[i] = false;
+                }
+                this.selectedTimeID = 0;
+                for (let i = 0; i < this.isTimeActive.length; i++) {
+                    this.isTimeActive[i] = false;
+                }
+                this.selectedDateID = 0;
+                this.ticketName = "";
+                this.ticketEmail = "";
+                this.ticketSurname = "";
+                this.ticketPhone = "";
+                this.isNoDate = true;
+                this.selectedPlace = "";
+                for (let i = 0; i < this.isPlaceSelected.length; i++) {
+                    this.isPlaceSelected[i] = false;
+                }
+
+                this.closePopup();
+            },
+            place_select(id) {
+                if (this.isPlaceSelected[id - 1]) {
+                    this.isPlaceSelected[id - 1] = false;
+                    this.selectedPlace = this.selectedPlace.replace(id + " ", "")
+                } else {
+                    this.selectedPlace += id + " ";
+                    this.isPlaceSelected[id - 1] = true;
+                }
+                app.$forceUpdate();
+            },
+            okButton() {
+                console.log(this.selectedFilm.title);
+                console.log(this.ticketName + " " + this.ticketSurname);
+                console.log(this.ticketPhone);
+                console.log(this.ticketEmail);
+                console.log(this.seances[this.selectedDateID].date);
+                console.log(this.seances[this.selectedDateID].seances[this.selectedTimeID]);
+                console.log(this.selectedPlace);
+
+                this.closePopup();
+            },
+            selectDate(index) {
+                for (let i = 0; i < this.isDateActive.length; i++) {
+                    this.isDateActive[i] = false;
+                }
+                this.isDateActive[index] = true;
+                this.selectedDateID = index;
+                this.isNoDate = false;
+            },
+            selectTime(index) {
+                for (let i = 0; i < this.isTimeActive.length; i++) {
+                    this.isTimeActive[i] = false;
+                }
+                this.isTimeActive[index] = true;
+                this.selectedTimeID = index;
+            },
+
+            selectFilm(film) {
+                if (film.title == this.selectedFilm.title) {
+                    this.selectedFilm = {};
+                    for (let i = 0; i < this.isFilmSelected.length; i++) {
+                        this.isFilmSelected[i] = false;
+                    }
+                } else {
+                    for (let i = 0; i < this.films.length; i++) {
+                        this.isFilmSelected[i] = (film.title == this.films[i].title)
+                    }
+                    this.selectedFilm = film;
+                }
+            },
+
+            handleCalendar(event) {
+                let ndate = new Date();
+                ndate.setDate(event.getDate());
+                let str = ndate.toISOString();
+                let dateStr = str.split("T")[0];
+
+                for (let i = 0; i < this.seances.length; i++) {
+                    if (dateStr == this.seances[i].date) {
+                        this.selectDate(i);
+                    }
+                }
+            },
+
+            showPopup() {
+                this.noerror = false;
+                this.formErrors = [];
+                if (!this.ticketName) this.formErrors.push("Требуется указать имя");
+                if (!this.ticketSurname) this.formErrors.push("Требуется указать фамилию");
+                if (!this.selectedFilm.title) this.formErrors.push("Требуется выбрать фильм");
+                if (!this.validEmail(this.ticketEmail)) this.formErrors.push("Неправильно введен e-mail");
+                if (!this.selectedPlace) this.formErrors.push("Не выбраны места");
+                if (!this.validPhone(this.ticketPhone)) this.formErrors.push("Неправильно указан телефон")
+                if (this.formErrors.length == 0) this.noerror = true;
+
+                this.popupShowed = true;
+
+            },
+
+            validPhone(string) {
+
+                if (string === ' '.repeat(string.length)) {
+                    return false
+                }
+                return string - 0 === string * 1
+            },
+
+            closePopup() {
+                if (this.popupShowed)
+                    this.popupShowed = false;
+            },
+
+            validEmail: function (email) {
+                const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                return re.test(email);
+            },
+
+            calculateSectionOffsets() {
+                let sections = document.getElementsByTagName('section');
+                let length = sections.length;
+
+                for (let i = 0; i < length; i++) {
+                    let sectionOffset = sections[i].offsetTop;
+                    this.offsets.push(sectionOffset);
+                }
+
+            },
+            onSwiperClickSlide(index, reallyIndex) {
+                this.selectedIndexes[reallyIndex] = !this.selectedIndexes[reallyIndex];
+                this.currentFilmList = [];
+                for (let i = 0; i < this.films.length; i++) {
+                    let contains = false;
+                    for (let j = 0; j < this.selectedIndexes.length; j++) {
+                        if ((this.films[i].genre == j) && (this.selectedIndexes[j]))
+                            contains = true;
+                    }
+                    if (contains) this.currentFilmList.push(this.films[i]);
+                }
+            },
+            showFilter(e) {
+                this.isFilterActive = !this.isFilterActive;
+                if (!this.isFilterActive)
+                    this.currentFilmList = this.films.slice();
+            },
+            handleMouseWheel: function (e) {
+
+                if (e.wheelDelta < 30 && !this.inMove) {
+                    this.moveUp();
+                } else if (e.wheelDelta > 30 && !this.inMove) {
+                    this.moveDown();
+                }
+
+                e.preventDefault();
+                return false;
+            },
+            handleMouseWheelDOM: function (e) {
+
+                if (e.detail > 0 && !this.inMove) {
+                    this.moveUp();
+                } else if (e.detail < 0 && !this.inMove) {
+                    this.moveDown();
+                }
+
+                return false;
+            },
+            moveDown() {
+                this.inMove = true;
+                this.activeSection--;
+
+                if (this.activeSection < 0) this.activeSection = this.offsets.length - 1;
+
+                this.scrollToSection(this.activeSection, true);
+            },
+            moveUp() {
+                this.inMove = true;
+                this.activeSection++;
+
+                if (this.activeSection > this.offsets.length - 1) this.activeSection = 0;
+
+                this.scrollToSection(this.activeSection, true);
+            },
+            scrollToSection(id, force = false) {
+                this.calculateSectionOffsets();
+                window.scrollBy(0, -0.01);
+                if (this.inMove && !force) return false;
+
+                this.activeSection = id;
+                this.inMove = true;
+                let sections = document.getElementsByTagName('section');
+                let length = sections.length;
+
+                for (let i = 0; i < length; i++) {
+                    if (document.getElementsByTagName('section')[i] != id) {
+                        document.getElementsByTagName('section')[i].classList.remove('_active');
+                    }
+                }
+                document.getElementsByTagName('section')[id].scrollIntoView({behavior: 'smooth'});
+
+                document.getElementsByTagName('section')[id].classList.toggle('_active');
+
+                setTimeout(() => {
+                    this.inMove = false;
+                    app.$forceUpdate();
+                }, 400);
+            }
+        },
+        created() {
+            this.calculateSectionOffsets();
+
+            this.currentFilmList = this.films.slice();
+            for (let i = 0; i < 36; i++) {
+                this.isPlaceSelected.push(false)
+            }
+
+            window.addEventListener('DOMMouseScroll', this.handleMouseWheelDOM);  // Mozilla Firefox
+            window.addEventListener('mousewheel', this.handleMouseWheel, {passive: false}); // Other browsers
+
+            window.addEventListener('touchstart', this.touchStart, {passive: false}); // mobile devices
+            window.addEventListener('touchmove', this.touchMove, {passive: false}); // mobile devices
+        },
+        destroyed() {
+            window.removeEventListener('mousewheel', this.handleMouseWheel, {passive: false});  // Other browsers
+            window.removeEventListener('DOMMouseScroll', this.handleMouseWheelDOM); // Mozilla Firefox
+
+            window.removeEventListener('touchstart', this.touchStart); // mobile devices
+            window.removeEventListener('touchmove', this.touchMove); // mobile devices
+        },
+        mounted() {
+            for (let i = 0; i < this.seances.length; i++) {
+                this.events.push({start: this.seances[i].date, end: this.seances[i].date})
+            }
+        }
+    });
+</script>
+<style>
+
+    input {
+        border: solid black 1px;
+    }
+
+    .filterPanel {
+        background: #FFF;
+        width: 60vw;
+
+    }
+
+    .vuecal__flex {
+        font-size: 18pt;
+    }
+
+    .fullpage {
+        height: 100vh;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: start;
+
+    }
+
+
+    .backpopup {
+        background: rgba(0, 0, 0, 0.7);
+    }
+
+    .sections-menu {
+        position: fixed;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+
+    .sections-menu .menu-point {
+        width: 20px;
+        height: 20px;
+        /*background-color: #FFF;*/
+        display: block;
+        margin: 1rem 0;
+        opacity: .6;
+        transition: .4s ease all;
+        cursor: pointer;
+        border-radius: 50%;
+    }
+
+    .sections-menu .menu-point.active {
+        opacity: 1;
+        transform: scale(1.5);
+    }
+
+    .swiper-container {
+        width: 100%;
+    }
+
+    .swiper-slide {
+        text-align: center;
+        font-size: 2em;
+        color: white;
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-pack: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        background: rgba(0, 0, 0, 0.2);
+        flex: 0 0 200px;
+        width: 30px;
+        border-radius: 30px;
+        margin: 0 0.5em;
+    }
+
+    .slide-fade-enter-active {
+        transition: all .3s ease;
+    }
+
+    .slide-fade-leave-active {
+        transition: all .8s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+    }
+
+    .slide-fade-enter, .slide-fade-leave-to
+        /* .slide-fade-leave-active до версии 2.1.8 */
+    {
+        transform: translateX(10px);
+        opacity: 0;
+    }
+
+    .filmSelected {
+        -webkit-box-shadow: 0px 0px 19px 6px rgba(255, 0, 0, 1);
+        -moz-box-shadow: 0px 0px 19px 6px rgba(255, 0, 0, 1);
+        box-shadow: 0px 0px 19px 6px rgba(255, 0, 0, 1);
+
+    }
+
+    .selectedGenre {
+        background: rgb(100, 46, 144);
+        background: linear-gradient(90deg, rgba(100, 46, 144, 1) 0%, rgba(37, 130, 196, 1) 100%);
+
+    }
+</style>
+</html>
